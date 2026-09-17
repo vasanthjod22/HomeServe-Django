@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking #{{ booking.id }} Details - HomeServices{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        <!-- Main Booking Header Card -->
+        <div class="custom-card p-4 mb-4">
+            <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 border-bottom pb-3">
+                <div>
+                    <span class="badge bg-dark mb-1">Booking #{{ booking.id }}</span>
+                    <h2 class="fw-bold mb-0">{{ booking.service.name }}</h2>
+                    <p class="text-muted mb-0"><i class="fa-solid fa-folder me-1"></i> {{ booking.service.category.name }} Category</p>
+                </div>
+                <div class="text-end mt-2 mt-md-0">
+                    <span class="badge-status badge-{{ booking.status|lower }} fs-6">{{ booking.get_status_display }}</span>
+                    <div class="text-muted small mt-1">Booked on {{ booking.created_at|date:"M d, Y" }}</div>
+                </div>
+            </div>
+
+            <!-- Booking Lifecycle Timeline -->
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-route text-primary me-2"></i> Service Workflow Timeline</h5>
+            <div class="timeline-container">
+                <div class="timeline-step">
+                    <div class="step-node {% if booking.status == 'PENDING' or booking.status == 'ASSIGNED' or booking.status == 'ACCEPTED' or booking.status == 'IN_PROGRESS' or booking.status == 'COMPLETED' %}active{% endif %}">1</div>
+                    <div class="step-label">Pending</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-node {% if booking.status == 'ASSIGNED' or booking.status == 'ACCEPTED' or booking.status == 'IN_PROGRESS' or booking.status == 'COMPLETED' %}active{% endif %}">2</div>
+                    <div class="step-label">Assigned</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-node {% if booking.status == 'ACCEPTED' or booking.status == 'IN_PROGRESS' or booking.status == 'COMPLETED' %}active{% endif %}">3</div>
+                    <div class="step-label">Scheduled</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-node {% if booking.status == 'IN_PROGRESS' or booking.status == 'COMPLETED' %}active{% endif %}">4</div>
+                    <div class="step-label">In Progress</div>
+                </div>
+                <div class="timeline-step">
+                    <div class="step-node {% if booking.status == 'COMPLETED' %}active{% endif %}">5</div>
+                    <div class="step-label">Completed</div>
+                </div>
+            </div>
+
+            <!-- Information Grid -->
+            <div class="row g-4 my-2">
+                <div class="col-md-6">
+                    <div class="bg-light p-3 rounded-3 h-100">
+                        <h6 class="fw-bold text-dark"><i class="fa-solid fa-clock me-1 text-primary"></i> Schedule & Location</h6>
+                        <ul class="list-unstyled mb-0 small mt-2">
+                            <li class="mb-1"><strong>Date:</strong> {{ booking.booking_date }}</li>
+                            <li class="mb-1"><strong>Time Slot:</strong> {{ booking.booking_time }}</li>
+                            <li><strong>Address:</strong> {{ booking.address }}</li>
+                            {% if booking.notes %}
+                                <li class="mt-2 text-muted"><strong>Customer Notes:</strong> {{ booking.notes }}</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="bg-light p-3 rounded-3 h-100">
+                        <h6 class="fw-bold text-dark"><i class="fa-solid fa-user-gear me-1 text-primary"></i> Service Provider</h6>
+                        {% if booking.provider %}
+                            <div class="d-flex align-items-center mt-2">
+                                <div class="bg-primary text-white rounded-circle p-2 me-3 fs-5">
+                                    <i class="fa-solid fa-user-ninja"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">{{ booking.provider.get_full_name|default:booking.provider.username }}</div>
+                                    <div class="text-muted small"><i class="fa-solid fa-phone me-1"></i> {{ booking.provider.phone|default:"No phone listed" }}</div>
+                                    <div class="text-muted small"><i class="fa-solid fa-envelope me-1"></i> {{ booking.provider.email }}</div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <p class="text-muted small mb-0 mt-2">No service provider assigned yet. Admin will review and assign an available certified provider.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Invoice & Complaint Actions -->
+            <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mt-4 pt-3 border-top">
+                <div>
+                    {% if booking.invoice %}
+                        <a href="{% url 'invoice_detail' booking.invoice.id %}" class="btn btn-success me-2">
+                            <i class="fa-solid fa-file-invoice-dollar me-1"></i> View Invoice (₹{{ booking.invoice.total_amount }})
+                        </a>
+                    {% endif %}
+                    
+                    {% if user == booking.customer %}
+                        <a href="{% url 'create_complaint' booking.id %}" class="btn btn-outline-warning text-dark">
+                            <i class="fa-solid fa-circle-exclamation me-1"></i> File Complaint Ticket
+                        </a>
+                    {% endif %}
+                </div>
+
+                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Rating Section -->
+        {% if booking.rating %}
+            <div class="custom-card p-4 bg-light border-warning">
+                <h5 class="fw-bold text-dark"><i class="fa-solid fa-star text-warning me-2"></i> Service Rating & Feedback</h5>
+                <div class="d-flex align-items-center mt-2">
+                    <div class="text-warning fs-5 me-2">
+                        {% for i in "12345"|make_list %}
+                            {% if forloop.counter <= booking.rating.stars %}
+                                ★
+                            {% else %}
+                                ☆
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="fw-bold fs-5 me-3">{{ booking.rating.stars }}.0 / 5.0</span>
+                    <span class="text-muted small">Submitted on {{ booking.rating.created_at|date:"M d, Y" }}</span>
+                </div>
+                {% if booking.rating.review %}
+                    <p class="mt-2 mb-0 fst-italic text-secondary">"{{ booking.rating.review }}"</p>
+                {% endif %}
+            </div>
+        {% elif rating_form %}
+            <div class="custom-card p-4">
+                <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-star text-warning me-2"></i> Rate Your Service Experience</h5>
+                <form method="post" action="{% url 'rate_service' booking.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Star Rating</label>
+                        {{ rating_form.stars }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Review / Feedback</label>
+                        {{ rating_form.review }}
+                    </div>
+                    <button type="submit" class="btn btn-warning text-dark fw-bold"><i class="fa-solid fa-check me-1"></i> Submit Service Rating</button>
+                </form>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

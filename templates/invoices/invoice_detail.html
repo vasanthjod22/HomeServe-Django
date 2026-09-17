@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Invoice #INV-{{ invoice.id }} - HomeServices{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="invoice-box">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center invoice-header">
+                <div>
+                    <h2 class="fw-bold text-dark mb-0"><i class="fa-solid fa-house-chimney-wrench text-primary me-2"></i> HomeServices</h2>
+                    <small class="text-muted">Home Services Management Platform</small>
+                </div>
+                <div class="text-end">
+                    <h4 class="fw-bold text-uppercase mb-0">Invoice</h4>
+                    <div class="text-muted small">#INV-{{ invoice.id }}</div>
+                    <div class="text-muted small">Date: {{ invoice.invoice_date|date:"M d, Y" }}</div>
+                </div>
+            </div>
+
+            <!-- Billing Details Grid -->
+            <div class="row mb-4">
+                <div class="col-6">
+                    <h6 class="fw-bold text-muted uppercase">Billed To (Customer):</h6>
+                    <div class="fw-bold text-dark fs-5">{{ invoice.booking.customer.get_full_name|default:invoice.booking.customer.username }}</div>
+                    <div class="text-muted small"><i class="fa-solid fa-envelope me-1"></i> {{ invoice.booking.customer.email }}</div>
+                    <div class="text-muted small"><i class="fa-solid fa-location-dot me-1"></i> {{ invoice.booking.address }}</div>
+                </div>
+                <div class="col-6 text-end">
+                    <h6 class="fw-bold text-muted uppercase">Service Provider:</h6>
+                    <div class="fw-bold text-dark fs-5">{{ invoice.booking.provider.get_full_name|default:invoice.booking.provider.username }}</div>
+                    <div class="text-muted small">{{ invoice.booking.service.category.name }} Specialist</div>
+                    <div class="text-muted small"><i class="fa-solid fa-phone me-1"></i> {{ invoice.booking.provider.phone|default:"N/A" }}</div>
+                </div>
+            </div>
+
+            <!-- Line Items Table -->
+            <table class="table table-bordered mb-4">
+                <thead class="table-light">
+                    <tr>
+                        <th>Service Description</th>
+                        <th class="text-center">Est. Duration</th>
+                        <th class="text-end">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="fw-bold text-dark">{{ invoice.booking.service.name }}</div>
+                            <small class="text-muted">Booking #{{ invoice.booking.id }} &bull; Completed on {{ invoice.booking.updated_at|date:"M d, Y" }}</small>
+                        </td>
+                        <td class="text-center">{{ invoice.booking.service.estimated_hours }} Hours</td>
+                        <td class="text-end fw-semibold">₹{{ invoice.subtotal }}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Financial Summary -->
+            <div class="row justify-content-end mb-4">
+                <div class="col-md-6">
+                    <div class="bg-light p-3 rounded-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Subtotal:</span>
+                            <span class="fw-semibold">₹{{ invoice.subtotal }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Service Tax (10%):</span>
+                            <span class="fw-semibold">₹{{ invoice.tax_amount }}</span>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between fs-5 fw-bold text-dark">
+                            <span>Total Due:</span>
+                            <span class="text-success">₹{{ invoice.total_amount }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status & Action Footer -->
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                <div>
+                    Status: 
+                    {% if invoice.payment_status == 'PAID' %}
+                        <span class="badge bg-success fs-6"><i class="fa-solid fa-circle-check me-1"></i> PAID on {{ invoice.paid_at|date:"M d, Y" }}</span>
+                    {% else %}
+                        <span class="badge bg-warning text-dark fs-6"><i class="fa-solid fa-clock me-1"></i> UNPAID</span>
+                    {% endif %}
+                </div>
+
+                <div>
+                    <button onclick="window.print()" class="btn btn-outline-secondary me-2"><i class="fa-solid fa-print me-1"></i> Print Invoice</button>
+                    {% if invoice.payment_status == 'UNPAID' and user == invoice.booking.customer %}
+                        <a href="{% url 'pay_invoice' invoice.id %}" class="btn btn-success fw-bold"><i class="fa-solid fa-credit-card me-1"></i> Pay Now (₹{{ invoice.total_amount }})</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Book {{ service.name }} - HomeServices{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="custom-card p-4">
+            <div class="d-flex align-items-center mb-4 border-bottom pb-3">
+                <div class="service-icon-box me-3 mb-0">
+                    <i class="fa-solid {{ service.category.icon }}"></i>
+                </div>
+                <div>
+                    <span class="badge bg-secondary mb-1">{{ service.category.name }}</span>
+                    <h3 class="fw-bold mb-0">Book Service: {{ service.name }}</h3>
+                    <p class="text-success fw-bold mb-0">₹{{ service.price }} &bull; ~{{ service.estimated_hours }} Hours</p>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Preferred Booking Date *</label>
+                        {{ form.booking_date }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Preferred Time Slot *</label>
+                        {{ form.booking_time }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Service Location Address *</label>
+                        {{ form.address }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Special Instructions or Notes</label>
+                        {{ form.notes }}
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4 d-flex align-items-center" role="alert">
+                    <i class="fa-solid fa-circle-info fa-lg me-3"></i>
+                    <div>
+                        <strong>What happens next?</strong> After submitting your booking request, our Admin team will assign a certified {{ service.category.name }} provider. You can track real-time status in your dashboard.
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{% url 'service_detail' service.id %}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary-custom btn-lg"><i class="fa-solid fa-paper-plane me-2"></i> Confirm Booking Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

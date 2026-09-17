@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Ticket #TCK-{{ complaint.id }} - HomeServices{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="custom-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <div>
+                    <span class="badge bg-secondary mb-1">Ticket #TCK-{{ complaint.id }}</span>
+                    <h3 class="fw-bold mb-0">{{ complaint.subject }}</h3>
+                    <small class="text-muted">Booking #{{ complaint.booking.id }} ({{ complaint.booking.service.name }})</small>
+                </div>
+                <div>
+                    {% if complaint.status == 'OPEN' %}
+                        <span class="badge bg-danger fs-6">OPEN</span>
+                    {% elif complaint.status == 'IN_REVIEW' %}
+                        <span class="badge bg-warning text-dark fs-6">IN REVIEW</span>
+                    {% else %}
+                        <span class="badge bg-success fs-6">RESOLVED</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Customer Complaint Details -->
+            <div class="mb-4">
+                <h6 class="fw-bold text-muted">Customer Description:</h6>
+                <div class="bg-light p-3 rounded-3 text-secondary lead fs-6">
+                    {{ complaint.description }}
+                </div>
+                <div class="text-muted small mt-2">
+                    Submitted by <strong>{{ complaint.customer.username }}</strong> on {{ complaint.created_at|date:"M d, Y H:i" }}
+                </div>
+            </div>
+
+            <!-- Admin Response Section -->
+            {% if user.is_admin_user %}
+                <hr class="my-4">
+                <h5 class="fw-bold text-dark"><i class="fa-solid fa-user-shield me-2 text-primary"></i> Admin Resolution & Response</h5>
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Update Ticket Status</label>
+                        <select name="status" class="form-select">
+                            <option value="OPEN" {% if complaint.status == 'OPEN' %}selected{% endif %}>Open</option>
+                            <option value="IN_REVIEW" {% if complaint.status == 'IN_REVIEW' %}selected{% endif %}>In Review</option>
+                            <option value="RESOLVED" {% if complaint.status == 'RESOLVED' %}selected{% endif %}>Resolved</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Admin Notes & Resolution Details</label>
+                        <textarea name="admin_notes" class="form-control" rows="3" placeholder="Enter notes or resolution action taken...">{{ complaint.admin_notes|default:'' }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary-custom"><i class="fa-solid fa-floppy-disk me-1"></i> Update Ticket Resolution</button>
+                </form>
+            {% else %}
+                {% if complaint.admin_notes %}
+                    <div class="alert alert-info mt-4">
+                        <h6 class="fw-bold mb-1"><i class="fa-solid fa-headset me-1"></i> Admin Response:</h6>
+                        <p class="mb-0">{{ complaint.admin_notes }}</p>
+                    </div>
+                {% endif %}
+            {% endif %}
+
+            <div class="d-flex justify-content-between mt-4 pt-3 border-top">
+                <a href="{% url 'complaint_list' %}" class="btn btn-outline-secondary">Back to Complaints List</a>
+                <a href="{% url 'booking_detail' complaint.booking.id %}" class="btn btn-outline-dark">View Related Booking</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Provider Registration - HomeServices{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="custom-card p-4">
+            <div class="text-center mb-4">
+                <div class="service-icon-box mx-auto">
+                    <i class="fa-solid fa-user-ninja"></i>
+                </div>
+                <h3 class="fw-bold">Register as Service Provider</h3>
+                <p class="text-muted">Join our team of verified Plumbers, Electricians, AC Technicians & Painters</p>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Username *</label>
+                        {{ form.username }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Email *</label>
+                        {{ form.email }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">First Name</label>
+                        {{ form.first_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Last Name</label>
+                        {{ form.last_name }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Password *</label>
+                        {{ form.password }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Confirm Password *</label>
+                        {{ form.confirm_password }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Phone Number</label>
+                        {{ form.phone }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Service Specialty *</label>
+                        {{ form.service_category }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Experience (Years)</label>
+                        {{ form.experience_years }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Hourly Rate (₹)</label>
+                        {{ form.hourly_rate }}
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Professional Bio & Skills</label>
+                        {{ form.bio }}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary-custom w-100 mt-4">Register as Provider</button>
+            </form>
+
+            <div class="text-center mt-3">
+                <span class="text-muted">Already registered?</span> <a href="{% url 'login' %}">Login here</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

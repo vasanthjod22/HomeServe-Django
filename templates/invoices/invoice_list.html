@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Invoices & Statements - HomeServices{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="fw-bold mb-0"><i class="fa-solid fa-file-invoice-dollar me-2 text-primary"></i> Invoices & Billing Statements</h2>
+        <p class="text-muted mb-0">View payment history and downloadable invoices</p>
+    </div>
+</div>
+
+<div class="custom-card p-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Invoice #</th>
+                    <th>Booking #</th>
+                    <th>Service Name</th>
+                    <th>Total Amount</th>
+                    <th>Date</th>
+                    <th>Payment Status</th>
+                    <th class="text-end">View & Pay</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                    <tr>
+                        <td class="fw-bold">#INV-{{ invoice.id }}</td>
+                        <td>#{{ invoice.booking.id }}</td>
+                        <td>{{ invoice.booking.service.name }}</td>
+                        <td class="fw-bold text-success">₹{{ invoice.total_amount }}</td>
+                        <td>{{ invoice.invoice_date|date:"M d, Y" }}</td>
+                        <td>
+                            {% if invoice.payment_status == 'PAID' %}
+                                <span class="badge bg-success"><i class="fa-solid fa-check me-1"></i> PAID</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark"><i class="fa-solid fa-clock me-1"></i> UNPAID</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'invoice_detail' invoice.id %}" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-receipt me-1"></i> View Invoice</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No invoices generated yet. Invoices are generated automatically upon job completion.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

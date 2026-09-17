@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Service Provider Dashboard - HomeServices{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="fw-bold mb-0"><i class="fa-solid fa-user-gear me-2 text-primary"></i> Service Provider Portal</h2>
+        <p class="text-muted mb-0">Manage assigned jobs, update schedule, and track completed services</p>
+    </div>
+    <div class="text-end">
+        <span class="badge bg-warning text-dark fs-6"><i class="fa-solid fa-star me-1"></i> Rating: {{ avg_rating }} / 5.0</span>
+    </div>
+</div>
+
+<!-- Provider Metrics -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="custom-card p-3 text-center border-primary">
+            <h6 class="text-muted mb-1">New Assignments</h6>
+            <h2 class="fw-bold text-primary mb-0">{{ pending_jobs.count }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="custom-card p-3 text-center border-info">
+            <h6 class="text-muted mb-1">Scheduled Jobs</h6>
+            <h2 class="fw-bold text-info mb-0">{{ scheduled_jobs.count }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="custom-card p-3 text-center border-purple">
+            <h6 class="text-muted mb-1">In Progress</h6>
+            <h2 class="fw-bold text-purple mb-0">{{ in_progress_jobs.count }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="custom-card p-3 text-center border-success">
+            <h6 class="text-muted mb-1">Completed Jobs</h6>
+            <h2 class="fw-bold text-success mb-0">{{ completed_jobs.count }}</h2>
+        </div>
+    </div>
+</div>
+
+<!-- Jobs Table -->
+<div class="custom-card p-4">
+    <h4 class="fw-bold mb-3"><i class="fa-solid fa-list-check me-2"></i> Assigned Service Jobs</h4>
+    
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Job ID</th>
+                    <th>Customer Name</th>
+                    <th>Service & Price</th>
+                    <th>Date & Time</th>
+                    <th>Address</th>
+                    <th>Status</th>
+                    <th class="text-end">Update Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in assigned_jobs %}
+                    <tr>
+                        <td class="fw-bold">#{{ job.id }}</td>
+                        <td>
+                            <div class="fw-semibold">{{ job.customer.get_full_name|default:job.customer.username }}</div>
+                            <small class="text-muted"><i class="fa-solid fa-phone me-1"></i> {{ job.customer.phone|default:"N/A" }}</small>
+                        </td>
+                        <td>
+                            <div class="fw-semibold text-dark">{{ job.service.name }}</div>
+                            <span class="text-success fw-bold">₹{{ job.service.price }}</span>
+                        </td>
+                        <td>
+                            <div>{{ job.booking_date }}</div>
+                            <small class="text-muted">{{ job.booking_time }}</small>
+                        </td>
+                        <td><small>{{ job.address|truncatewords:6 }}</small></td>
+                        <td><span class="badge-status badge-{{ job.status|lower }}">{{ job.get_status_display }}</span></td>
+                        <td class="text-end">
+                            <form method="post" action="{% url 'provider_update_job_status' job.id %}" class="d-inline">
+                                {% csrf_token %}
+                                {% if job.status == 'ASSIGNED' %}
+                                    <input type="hidden" name="status" value="ACCEPTED">
+                                    <button type="submit" class="btn btn-sm btn-success me-1"><i class="fa-solid fa-check me-1"></i> Accept</button>
+                                {% endif %}
+                            </form>
+                            
+                            {% if job.status == 'ASSIGNED' %}
+                                <form method="post" action="{% url 'provider_update_job_status' job.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="REJECTED">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger me-1"><i class="fa-solid fa-xmark me-1"></i> Reject</button>
+                                </form>
+                            {% elif job.status == 'ACCEPTED' %}
+                                <form method="post" action="{% url 'provider_update_job_status' job.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="IN_PROGRESS">
+                                    <button type="submit" class="btn btn-sm btn-primary"><i class="fa-solid fa-play me-1"></i> Start Job</button>
+                                </form>
+                            {% elif job.status == 'IN_PROGRESS' %}
+                                <form method="post" action="{% url 'provider_update_job_status' job.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="status" value="COMPLETED">
+                                    <button type="submit" class="btn btn-sm btn-success"><i class="fa-solid fa-flag-checkered me-1"></i> Mark Complete</button>
+                                </form>
+                            {% elif job.status == 'COMPLETED' %}
+                                <span class="text-success small fw-bold"><i class="fa-solid fa-circle-check"></i> Finished</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No service jobs assigned to your profile yet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

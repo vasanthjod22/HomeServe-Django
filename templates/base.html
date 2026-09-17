@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Home Services Platform{% endblock %}</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="fa-solid fa-house-chimney-wrench"></i> HomeServices
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'service_list' %}"><i class="fa-solid fa-list-check me-1"></i> Services</a>
+                    </li>
+                    {% if user.is_authenticated %}
+                        {% if user.is_customer_user %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'customer_bookings' %}"><i class="fa-solid fa-calendar-check me-1"></i> My Bookings</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'invoice_list' %}"><i class="fa-solid fa-file-invoice-dollar me-1"></i> Invoices</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'complaint_list' %}"><i class="fa-solid fa-circle-exclamation me-1"></i> Complaints</a>
+                            </li>
+                        {% elif user.is_provider_user %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'provider_dashboard' %}"><i class="fa-solid fa-user-gear me-1"></i> Provider Portal</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'invoice_list' %}"><i class="fa-solid fa-file-invoice-dollar me-1"></i> Earnings / Invoices</a>
+                            </li>
+                        {% elif user.is_admin_user %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'admin_dashboard' %}"><i class="fa-solid fa-chart-line me-1"></i> Admin Dashboard</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'manage_services' %}"><i class="fa-solid fa-gear me-1"></i> Manage Services</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'invoice_list' %}"><i class="fa-solid fa-file-invoice me-1"></i> All Invoices</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'complaint_list' %}"><i class="fa-solid fa-triangle-exclamation me-1"></i> Complaints</a>
+                            </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item d-flex align-items-center">
+                            <span class="user-badge">
+                                <i class="fa-solid fa-user me-1"></i> {{ user.username }} ({{ user.get_role_display }})
+                            </span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'profile' %}">Profile</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-outline-light btn-sm ms-2" href="{% url 'logout' %}">Logout</a>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="btn btn-primary-custom btn-sm ms-2 dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                Register
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{% url 'register_customer' %}"><i class="fa-solid fa-user me-2"></i>As Customer</a></li>
+                                <li><a class="dropdown-item" href="{% url 'register_provider' %}"><i class="fa-solid fa-user-ninja me-2"></i>As Service Provider</a></li>
+                            </ul>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center">
+        <div class="container">
+            <p class="mb-0">&copy; {% now "Y" %} HomeServices Platform - Plumber, Electrician, AC Service, Cleaning & Painting Management System</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

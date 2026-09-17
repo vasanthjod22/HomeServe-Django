@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}User Profile - HomeServices{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="custom-card p-4">
+            <div class="d-flex align-items-center mb-4">
+                <div class="service-icon-box me-3 mb-0">
+                    <i class="fa-solid fa-id-card"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">Account Profile</h3>
+                    <p class="text-muted mb-0">Manage your profile details and preferences</p>
+                </div>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Username</label>
+                        <input type="text" class="form-control" value="{{ user.username }}" disabled>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Email</label>
+                        <input type="email" class="form-control" value="{{ user.email }}" disabled>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">First Name</label>
+                        <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Last Name</label>
+                        <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Phone</label>
+                        <input type="text" name="phone" class="form-control" value="{{ user.phone|default:'' }}">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Role</label>
+                        <input type="text" class="form-control" value="{{ user.get_role_display }}" disabled>
+                    </div>
+
+                    {% if customer_profile %}
+                        <hr class="my-4">
+                        <h5 class="fw-bold">Customer Details</h5>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">City</label>
+                            <input type="text" name="city" class="form-control" value="{{ customer_profile.city|default:'' }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Address</label>
+                            <textarea name="address" class="form-control" rows="2">{{ customer_profile.address|default:'' }}</textarea>
+                        </div>
+                    {% endif %}
+
+                    {% if provider_profile %}
+                        <hr class="my-4">
+                        <h5 class="fw-bold">Provider Details</h5>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Specialty Category</label>
+                            <input type="text" class="form-control" value="{{ provider_profile.service_category.name|default:'General' }}" disabled>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Years of Experience</label>
+                            <input type="number" name="experience_years" class="form-control" value="{{ provider_profile.experience_years }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Hourly Rate (₹)</label>
+                            <input type="number" step="0.01" name="hourly_rate" class="form-control" value="{{ provider_profile.hourly_rate }}">
+                        </div>
+                        <div class="col-md-6 d-flex align-items-center mt-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_available" id="is_available" {% if provider_profile.is_available %}checked{% endif %}>
+                                <label class="form-check-label fw-semibold" for="is_available">Available for New Job Assignments</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Bio</label>
+                            <textarea name="bio" class="form-control" rows="3">{{ provider_profile.bio|default:'' }}</textarea>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-primary-custom w-100 mt-4">Save Changes</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

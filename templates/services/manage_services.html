@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Services - Admin - HomeServices{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="fw-bold mb-0"><i class="fa-solid fa-list-check me-2 text-primary"></i> Service Catalog Management</h2>
+        <p class="text-muted mb-0">Add, edit, or deactivate service offerings</p>
+    </div>
+    <a href="{% url 'add_service' %}" class="btn btn-primary-custom"><i class="fa-solid fa-plus me-1"></i> Add New Service</a>
+</div>
+
+<div class="custom-card p-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Service Name</th>
+                    <th>Category</th>
+                    <th>Price</th>
+                    <th>Est. Duration</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in services %}
+                    <tr>
+                        <td class="fw-bold">#{{ service.id }}</td>
+                        <td>
+                            <div class="fw-semibold">{{ service.name }}</div>
+                            <small class="text-muted">{{ service.description|truncatewords:8 }}</small>
+                        </td>
+                        <td><span class="badge bg-secondary"><i class="fa-solid {{ service.category.icon }} me-1"></i> {{ service.category.name }}</span></td>
+                        <td class="fw-bold text-success">₹{{ service.price }}</td>
+                        <td>{{ service.estimated_hours }} hrs</td>
+                        <td>
+                            {% if service.is_active %}
+                                <span class="badge bg-success">Active</span>
+                            {% else %}
+                                <span class="badge bg-danger">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-end">
+                            <a href="{% url 'edit_service' service.id %}" class="btn btn-sm btn-outline-primary me-1"><i class="fa-solid fa-pen-to-square"></i> Edit</a>
+                            <a href="{% url 'delete_service' service.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this service?')"><i class="fa-solid fa-trash"></i> Delete</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No services created yet. Click 'Add New Service' to create one.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

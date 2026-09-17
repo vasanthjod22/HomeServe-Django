@@ -1,0 +1,129 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard - HomeServices{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <div>
+        <h2 class="fw-bold mb-0"><i class="fa-solid fa-chart-line me-2 text-primary"></i> Administrator Dashboard</h2>
+        <p class="text-muted mb-0">Platform overview, provider assignment, revenue, and customer management</p>
+    </div>
+    <div>
+        <a href="{% url 'manage_services' %}" class="btn btn-outline-dark me-2"><i class="fa-solid fa-gear me-1"></i> Manage Services</a>
+        <a href="{% url 'invoice_list' %}" class="btn btn-outline-success"><i class="fa-solid fa-file-invoice-dollar me-1"></i> Invoices</a>
+    </div>
+</div>
+
+<!-- Admin Overview Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="custom-card p-3 text-center border-start border-4 border-primary">
+            <h6 class="text-muted mb-1">Total Customers</h6>
+            <h2 class="fw-bold text-dark mb-0">{{ total_customers }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="custom-card p-3 text-center border-start border-4 border-info">
+            <h6 class="text-muted mb-1">Service Providers</h6>
+            <h2 class="fw-bold text-dark mb-0">{{ total_providers }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="custom-card p-3 text-center border-start border-4 border-warning">
+            <h6 class="text-muted mb-1">Pending Assignments</h6>
+            <h2 class="fw-bold text-warning mb-0">{{ pending_assignments.count }}</h2>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="custom-card p-3 text-center border-start border-4 border-success">
+            <h6 class="text-muted mb-1">Total Revenue Collected</h6>
+            <h2 class="fw-bold text-success mb-0">₹{{ total_revenue|floatformat:2 }}</h2>
+        </div>
+    </div>
+</div>
+
+<!-- Action Required: Pending Assignments -->
+{% if pending_assignments %}
+    <div class="custom-card p-4 mb-4 border-warning">
+        <h4 class="fw-bold text-warning mb-3"><i class="fa-solid fa-triangle-exclamation me-2"></i> Unassigned Booking Queue (Action Required)</h4>
+        
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-warning">
+                    <tr>
+                        <th>Booking ID</th>
+                        <th>Service</th>
+                        <th>Customer</th>
+                        <th>Requested Date & Time</th>
+                        <th>Status</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in pending_assignments %}
+                        <tr>
+                            <td class="fw-bold">#{{ booking.id }}</td>
+                            <td>
+                                <div class="fw-semibold">{{ booking.service.name }}</div>
+                                <small class="text-muted"><i class="fa-solid {{ booking.service.category.icon }} me-1"></i> {{ booking.service.category.name }}</small>
+                            </td>
+                            <td>{{ booking.customer.get_full_name|default:booking.customer.username }}</td>
+                            <td>{{ booking.booking_date }} at {{ booking.booking_time }}</td>
+                            <td><span class="badge-status badge-{{ booking.status|lower }}">{{ booking.get_status_display }}</span></td>
+                            <td class="text-end">
+                                <a href="{% url 'admin_assign_provider' booking.id %}" class="btn btn-primary-custom btn-sm"><i class="fa-solid fa-user-plus me-1"></i> Assign Provider</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endif %}
+
+<!-- Recent Bookings Table -->
+<div class="custom-card p-4">
+    <h4 class="fw-bold mb-3"><i class="fa-solid fa-clock-rotate-left me-2"></i> Recent Platform Bookings</h4>
+    
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID</th>
+                    <th>Customer</th>
+                    <th>Service</th>
+                    <th>Assigned Provider</th>
+                    <th>Booking Date</th>
+                    <th>Status</th>
+                    <th class="text-end">Detail</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in recent_bookings %}
+                    <tr>
+                        <td class="fw-bold">#{{ booking.id }}</td>
+                        <td>{{ booking.customer.username }}</td>
+                        <td>{{ booking.service.name }}</td>
+                        <td>
+                            {% if booking.provider %}
+                                <span class="badge bg-light text-dark border">{{ booking.provider.username }}</span>
+                            {% else %}
+                                <span class="text-muted fst-italic">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ booking.booking_date }}</td>
+                        <td><span class="badge-status badge-{{ booking.status|lower }}">{{ booking.get_status_display }}</span></td>
+                        <td class="text-end">
+                            <a href="{% url 'booking_detail' booking.id %}" class="btn btn-sm btn-outline-secondary">View</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center py-4 text-muted">No bookings registered in system yet.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
